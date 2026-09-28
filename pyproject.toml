@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oilspill"
+version = "0.1.0"
+description = "Open-source reproduction of SkyTruth Cerulean's Sentinel-1 oil-slick detection pipeline"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [{ name = "oilspill contributors" }]
+
+# Versions here are DELIBERATELY loose until Phase 0 records what actually
+# resolved on this machine; see requirements.lock.txt for the pinned set.
+dependencies = [
+  "numpy",
+  "pandas",
+  "pyarrow",
+  "rasterio",
+  "shapely>=2.0",
+  # NOT pyproj / geopandas / pyogrio: Windows Smart App Control blocks their
+  # native extensions on the dev machine (DECISIONS.md D0.6). All CRS work goes
+  # through rasterio's bundled GDAL/PROJ (oilspill.crsutil) and shapefiles are
+  # read with pure-Python pyshp (oilspill.landmask).
+  "pyshp",
+  "pystac-client",
+  "planetary-computer",
+  "httpx",
+  "tenacity",
+  "Pillow",
+  "matplotlib",
+  "tqdm",
+  "python-dotenv",
+  "scipy",
+]
+
+[project.optional-dependencies]
+train = [
+  "torch",
+  "torchvision",
+  "segmentation-models-pytorch==0.5.0",
+  "timm",
+  "albumentations",
+  "tensorboard",
+  "scikit-learn",
+]
+export = ["onnx", "onnxruntime"]
+api = [
+  "fastapi",
+  "uvicorn[standard]",
+  "python-multipart",
+  "sqlalchemy>=2",
+  "geoalchemy2",
+  "alembic",
+]
+dev = ["pytest", "pytest-cov", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = ["E501"]

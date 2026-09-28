@@ -1,0 +1,10 @@
+# Cloud web server (OILSPILL_API_PROCESSING=0): website + stored detections + archive/ship lookups.
+# No rasterio / onnxruntime here - scenes are processed by the scheduled GitHub Actions job.
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+sqlalchemy>=2.0
+psycopg[binary]>=3.2
+httpx>=0.27
+shapely>=2.0
+python-dotenv>=1.0

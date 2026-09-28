@@ -1,0 +1,167 @@
+{
+  "model_version": "v20260927-0325-nogit",
+  "architecture": "Unet-resnet34 (segmentation_models_pytorch), 1-channel VV, 4 classes",
+  "input": {
+    "tile_px": 512,
+    "pixel_deg": 0.0006866455078125,
+    "crs": "EPSG:4326",
+    "radiometry": "pseudo-dB = 10*log10(DN^2+1) of uncalibrated S1 GRD VV, clipped to db_clip -> uint8 1..255 (0 = nodata) -> /255 -> (x-mean)/std, nodata -> 0"
+  },
+  "db_clip": [
+    31.013442039489746,
+    49.5135440826416
+  ],
+  "norm_mean": 0.40264654529598465,
+  "norm_std": 0.27692307456492343,
+  "classes": {
+    "1": "INFRA",
+    "2": "NATURAL",
+    "3": "VESSEL"
+  },
+  "thresholds": {
+    "p_low": 0.0001,
+    "p_seed": 0.6,
+    "p_trim": 0.5,
+    "min_area_m2": 100000.0
+  },
+  "best_epoch": 27,
+  "val_metrics_crops": {
+    "INFRA": {
+      "precision": 0.039243883517190485,
+      "recall": 0.1639050604567846,
+      "f1_dice": 0.06332566613064099,
+      "iou": 0.032698149101878224,
+      "tp": 6222,
+      "fp": 152325,
+      "fn": 31739
+    },
+    "NATURAL": {
+      "precision": 0.19112271540469974,
+      "recall": 0.07669829442924501,
+      "f1_dice": 0.10946703776014624,
+      "iou": 0.057902739569508775,
+      "tp": 13176,
+      "fp": 55764,
+      "fn": 158614
+    },
+    "VESSEL": {
+      "precision": 0.6163310126393163,
+      "recall": 0.48075679266281707,
+      "f1_dice": 0.540167012016878,
+      "iou": 0.37001973271145394,
+      "tp": 82507,
+      "fp": 51361,
+      "fn": 89112
+    },
+    "OIL_binary": {
+      "precision": 0.622318772398334,
+      "recall": 0.5896583370480111,
+      "f1_dice": 0.6055484869904743,
+      "iou": 0.4342556778353452,
+      "tp": 224878,
+      "fp": 136477,
+      "fn": 156492
+    },
+    "confusion_matrix": [
+      [
+        96141745,
+        72723,
+        30763,
+        32991
+      ],
+      [
+        27704,
+        6222,
+        2449,
+        1586
+      ],
+      [
+        73310,
+        68520,
+        13176,
+        16784
+      ],
+      [
+        55478,
+        11082,
+        22552,
+        82507
+      ]
+    ]
+  },
+  "metrics": {
+    "test_T1_oil_pixel": {
+      "precision": 0.2147848121671931,
+      "recall": 0.805026340137082,
+      "f1_dice": 0.3390969609722344,
+      "iou": 0.2041642124821024,
+      "tp": 42635,
+      "fp": 155866,
+      "fn": 10326
+    },
+    "test_T1_instance": {
+      "precision": 0.24345549738219896,
+      "recall": 0.2540983606557377,
+      "f1_dice": 0.24866310160427807,
+      "iou": 0.14198473282442747,
+      "tp": 93,
+      "fp": 289,
+      "fn": 273
+    },
+    "test_T1plusT2_oil_pixel": {
+      "precision": 0.4594087076113357,
+      "recall": 0.6862943293351464,
+      "f1_dice": 0.5503862357232728,
+      "iou": 0.3796778488771341,
+      "tp": 208442,
+      "fp": 245276,
+      "fn": 95279
+    },
+    "test_T1plusT2_instance": {
+      "precision": 0.4470588235294118,
+      "recall": 0.20119126406353408,
+      "f1_dice": 0.2774988589685075,
+      "iou": 0.16110227874933758,
+      "tp": 304,
+      "fp": 376,
+      "fn": 1207
+    },
+    "per_class_T1": {
+      "INFRA": {
+        "precision": 0.0768881489329499,
+        "recall": 0.427028774652441,
+        "f1_dice": 0.13031295631240383,
+        "iou": 0.06969773725092875,
+        "tp": 6604,
+        "fp": 79287,
+        "fn": 8861
+      },
+      "NATURAL": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_dice": 0.0,
+        "iou": 0.0,
+        "tp": 0,
+        "fp": 40784,
+        "fn": 2264
+      },
+      "VESSEL": {
+        "precision": 0.10398741402834628,
+        "recall": 0.2119947774750227,
+        "f1_dice": 0.13953184255263504,
+        "iou": 0.07499824277781683,
+        "tp": 7469,
+        "fp": 64357,
+        "fn": 27763
+      }
+    }
+  },
+  "onnx_torch_max_abs_diff": 1.9073486328125e-05,
+  "trained_on": "166 Sentinel-1 scenes; labels derived from SkyTruth Cerulean API (CC BY-SA 4.0)",
+  "license": "weights CC BY-SA 4.0 (derived from Cerulean data); code Apache-2.0; non-commercial conservation use per SkyTruth ToS",
+  "attribution": [
+    "SkyTruth Cerulean (cerulean.skytruth.org). 2026. CC BY-SA 4.0.",
+    "Contains modified Copernicus Sentinel data 2026."
+  ],
+  "exported_at": "2026-09-27T03:25:57.874789+00:00"
+}

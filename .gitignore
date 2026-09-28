@@ -1,0 +1,45 @@
+# Data & artifacts
+data/
+!data/splits/
+!data/splits/.gitkeep
+models/*
+!models/model_card.json
+*.tif
+*.tiff
+*.npy
+*.pt
+*.onnx
+reports/**/*.png
+reports/**/*.tif
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Env & secrets
+.env
+.env.local
+
+# OS / editor
+Thumbs.db
+.DS_Store
+
+*.db
+*.db-wal
+*.db-shm
+
+# local tooling
+.claude/
+__MACOSX/

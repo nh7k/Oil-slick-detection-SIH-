@@ -1,0 +1,12 @@
+# Render Blueprint: New > Blueprint > pick this repo. Free plan sleeps after 15 min idle.
+services:
+  - type: web
+    name: ocean-police
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL        # paste the Neon connection string in the Render dashboard
+        sync: false

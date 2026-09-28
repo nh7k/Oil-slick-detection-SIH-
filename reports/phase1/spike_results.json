@@ -1,0 +1,157 @@
+{
+  "generated": "2026-09-27T03:39:08",
+  "min_contrast_db": 2.0,
+  "land_tol_px": 2.0,
+  "footprint_min_frac": 0.99,
+  "window_pad_m": 20000.0,
+  "read_decimation": 8,
+  "pixel_deg": 0.0006866455078125,
+  "orbit_directions_seen": [
+    "ascending",
+    "descending"
+  ],
+  "crit_e_both_passes": true,
+  "results": [
+    {
+      "slick_id": 3880640,
+      "cerulean_cls": 3,
+      "hitl_cls": 3,
+      "machine_confidence": 0.9803336262702942,
+      "area_m2": 387763442.6534073,
+      "scene_id": "S1A_IW_GRDH_1SDV_20250323T045229_20250323T045254_058427_0739ED_999A",
+      "region": "other_11.6E_-5.9N",
+      "centroid": [
+        11.60278,
+        -5.85892
+      ],
+      "matched_item_id": "S1A_IW_GRDH_1SDV_20250323T045229_20250323T045254_058427_0739ED",
+      "match_method": "id_minus_suffix",
+      "orbit_direction": "descending",
+      "native_shape": [
+        16826,
+        25487
+      ],
+      "overview_factors": [
+        2,
+        4,
+        8,
+        16,
+        32,
+        64
+      ],
+      "gcp_count": 210,
+      "gcp_crs": "EPSG:4326",
+      "decimated_shape": [
+        2103,
+        3185
+      ],
+      "read_seconds": 6.01,
+      "warp_seconds": 0.27,
+      "bytes_read_estimate": 13396110,
+      "db_inside": 30.788,
+      "db_ring": 34.702,
+      "contrast_db": 3.915,
+      "crit_b_contrast": true,
+      "crit_c_land_px": 0.0,
+      "crit_c_land": true,
+      "footprint_frac": 1.0,
+      "crit_d_footprint": true,
+      "valid_frac": 0.9997,
+      "error": null
+    },
+    {
+      "slick_id": 3098513,
+      "cerulean_cls": 3,
+      "hitl_cls": 3,
+      "machine_confidence": 0.912475049495697,
+      "area_m2": 301603829.26547754,
+      "scene_id": "S1A_IW_GRDH_1SDV_20230917T000951_20230917T001016_050360_061036_7DC5",
+      "region": "gulf_of_mexico",
+      "centroid": [
+        -92.18684,
+        27.02184
+      ],
+      "matched_item_id": "S1A_IW_GRDH_1SDV_20230917T000951_20230917T001016_050360_061036",
+      "match_method": "id_minus_suffix",
+      "orbit_direction": "ascending",
+      "native_shape": [
+        16734,
+        25887
+      ],
+      "overview_factors": [
+        2,
+        4,
+        8,
+        16,
+        32,
+        64
+      ],
+      "gcp_count": 210,
+      "gcp_crs": "EPSG:4326",
+      "decimated_shape": [
+        2091,
+        3235
+      ],
+      "read_seconds": 2.36,
+      "warp_seconds": 0.3,
+      "bytes_read_estimate": 13528770,
+      "db_inside": 34.038,
+      "db_ring": 37.431,
+      "contrast_db": 3.393,
+      "crit_b_contrast": true,
+      "crit_c_land_px": null,
+      "crit_c_land": null,
+      "footprint_frac": 0.99873,
+      "crit_d_footprint": true,
+      "valid_frac": 0.701,
+      "error": null
+    },
+    {
+      "slick_id": 4823849,
+      "cerulean_cls": 5,
+      "hitl_cls": 8,
+      "machine_confidence": 0.9947996139526367,
+      "area_m2": 195660864.47259787,
+      "scene_id": "S1A_IW_GRDH_1SDV_20260406T121138_20260406T121207_063959_080BBB_227B",
+      "region": "other_88.9E_19.8N",
+      "centroid": [
+        88.86372,
+        19.75936
+      ],
+      "matched_item_id": "S1A_IW_GRDH_1SDV_20260406T121138_20260406T121207_063959_080BBB",
+      "match_method": "id_minus_suffix",
+      "orbit_direction": "ascending",
+      "native_shape": [
+        19444,
+        25692
+      ],
+      "overview_factors": [
+        2,
+        4,
+        8,
+        16,
+        32,
+        64
+      ],
+      "gcp_count": 231,
+      "gcp_crs": "EPSG:4326",
+      "decimated_shape": [
+        2430,
+        3211
+      ],
+      "read_seconds": 2.79,
+      "warp_seconds": 0.51,
+      "bytes_read_estimate": 15605460,
+      "db_inside": 31.461,
+      "db_ring": 35.325,
+      "contrast_db": 3.864,
+      "crit_b_contrast": true,
+      "crit_c_land_px": null,
+      "crit_c_land": null,
+      "footprint_frac": 1.0,
+      "crit_d_footprint": true,
+      "valid_frac": 0.9671,
+      "error": null
+    }
+  ]
+}
