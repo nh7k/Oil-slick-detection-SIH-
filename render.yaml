@@ -4,6 +4,7 @@ services:
     name: ocean-police
     runtime: docker
     plan: free
+    region: ohio            # same region as the Neon database (AWS us-east-2) = faster queries
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
     autoDeploy: true
