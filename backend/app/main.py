@@ -54,7 +54,21 @@ from .database import (Detection, Run, Scene, detection_feature, load_overlay, m
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 log = logging.getLogger("oilwatch")
 
-engine = make_engine()
+# A database that is briefly unreachable (cold Neon compute, wrong URL) must not kill the
+# web server: it still serves the website and reports the problem in /api/health.
+DB_ERROR: str | None = None
+try:
+    engine = make_engine()
+except Exception as _exc:  # noqa: BLE001
+    DB_ERROR = f"{type(_exc).__name__}: {_exc}"
+    log.error("database unavailable at startup: %s", DB_ERROR)
+    try:  # keep the real URL so requests recover once the database is reachable
+        from sqlalchemy import create_engine as _ce
+
+        from .database import normalize_url as _nu
+        engine = _ce(_nu(config.DATABASE_URL), pool_pre_ping=True)
+    except Exception:  # noqa: BLE001  (driver itself unavailable)
+        engine = make_engine("sqlite://")
 SessionLocal = sessionmaker(engine, expire_on_commit=False)
 executor = ThreadPoolExecutor(max_workers=1)  # one scene at a time: bounded RAM
 jobs: dict[str, dict] = {}
@@ -128,9 +142,13 @@ def _model_card() -> dict | None:
 def health():
     lm = pipeline.get_model() if pipeline else None
     card = lm.card.raw if lm else (_model_card() if not PROCESSING_ENABLED else None)
-    with SessionLocal() as s:
-        n = s.scalar(select(func.count(Detection.id))) or 0
-    return {"status": "ok", "model_loaded": card is not None, "pipeline_error": PIPELINE_ERROR,
+    try:
+        with SessionLocal() as s:
+            n = s.scalar(select(func.count(Detection.id))) or 0
+        db_error = None
+    except Exception as exc:  # noqa: BLE001
+        n, db_error = 0, f"{type(exc).__name__}: {str(exc).splitlines()[0][:200]}"
+    return {"status": "ok" if db_error is None else "degraded", "db_error": db_error, "model_loaded": card is not None, "pipeline_error": PIPELINE_ERROR,
             "processing": "on-demand" if lm else ("scheduled" if not PROCESSING_ENABLED else "unavailable"),
             "model_version": card.get("model_version") if card else None, "db_detections": n}
 

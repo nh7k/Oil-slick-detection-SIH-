@@ -4,7 +4,9 @@
 FROM node:20-slim AS web
 WORKDIR /web
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci --no-audit --no-fund
+# The lockfile was generated on Windows; npm can omit Linux-only optional binaries
+# (rollup/esbuild) from it, so fall back to a fresh install if `npm ci` breaks.
+RUN npm ci --no-audit --no-fund && node -e "require('rollup')"     || (rm -rf node_modules package-lock.json && npm install --no-audit --no-fund)
 COPY frontend/ ./
 RUN npm run build
 
