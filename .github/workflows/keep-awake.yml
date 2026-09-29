@@ -1,0 +1,18 @@
+# Render's free web service sleeps after 15 minutes without visitors, and waking it takes
+# ~1 minute. Pinging /api/health every 10 minutes keeps it awake (one always-on free
+# service fits in Render's 750 free hours/month). Set the repo variable SITE_URL to your
+# Render link, e.g. https://ocean-police.onrender.com
+name: keep-awake
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: ${{ vars.SITE_URL != '' }}
+    steps:
+      - run: curl -fsS --max-time 120 "${{ vars.SITE_URL }}/api/health" || true
