@@ -101,8 +101,9 @@ def _magma(p: np.ndarray) -> np.ndarray:
     return rgba
 
 
-#: Longest side of stored overlay PNGs; keeps each image to a few hundred kB in the database.
-OVERLAY_MAX_PX = 1600
+#: Longest side of stored overlay images. Stored as lossy WebP (with alpha) so each image
+#: is tens of kB - the free cloud database is only 0.5 GB.
+OVERLAY_MAX_PX = 1024
 
 
 def _png_bytes(img: Image.Image) -> bytes:
@@ -111,8 +112,10 @@ def _png_bytes(img: Image.Image) -> bytes:
     if max(img.size) > OVERLAY_MAX_PX:
         f = OVERLAY_MAX_PX / max(img.size)
         img = img.resize((max(1, round(img.width * f)), max(1, round(img.height * f))), Image.BILINEAR)
+    if img.mode == "LA":
+        img = img.convert("RGBA")
     buf = io.BytesIO()
-    img.save(buf, format="PNG", optimize=True)
+    img.save(buf, format="WEBP", quality=70, method=4)
     return buf.getvalue()
 
 

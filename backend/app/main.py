@@ -139,16 +139,33 @@ def _model_card() -> dict | None:
         return None
 
 
+_count_cache: dict = {"t": 0.0, "n": 0, "err": None}
+
+
+def _detection_count() -> tuple[int, str | None]:
+    """Detection count, cached for an hour.
+
+    The website polls /api/health every 30 s. A database query on every poll keeps a
+    serverless database (Neon) awake 24/7 and burns its free compute hours.
+    """
+    import time as _t
+
+    if _t.time() - _count_cache["t"] < 3600:
+        return _count_cache["n"], _count_cache["err"]
+    try:
+        with SessionLocal() as s:
+            n, err = s.scalar(select(func.count(Detection.id))) or 0, None
+    except Exception as exc:  # noqa: BLE001
+        n, err = 0, f"{type(exc).__name__}: {str(exc).splitlines()[0][:200]}"
+    _count_cache.update(t=_t.time(), n=n, err=err)
+    return n, err
+
+
 @app.get("/api/health")
 def health():
     lm = pipeline.get_model() if pipeline else None
     card = lm.card.raw if lm else (_model_card() if not PROCESSING_ENABLED else None)
-    try:
-        with SessionLocal() as s:
-            n = s.scalar(select(func.count(Detection.id))) or 0
-        db_error = None
-    except Exception as exc:  # noqa: BLE001
-        n, db_error = 0, f"{type(exc).__name__}: {str(exc).splitlines()[0][:200]}"
+    n, db_error = _detection_count()
     return {"status": "ok" if db_error is None else "degraded", "db_error": db_error, "model_loaded": card is not None, "pipeline_error": PIPELINE_ERROR,
             "processing": "on-demand" if lm else ("scheduled" if not PROCESSING_ENABLED else "unavailable"),
             "model_version": card.get("model_version") if card else None, "db_detections": n}
@@ -268,7 +285,8 @@ def _overlay_file(scene_id: str, name: str):
         row = load_overlay(s, key, kind)
         if row is not None:
             headers = {"X-Image-Bounds": json.dumps(row.meta.get("image_bounds")), "Cache-Control": "max-age=3600"}
-            return Response(row.png, media_type="image/png", headers=headers)
+            mt = "image/webp" if row.png[:4] == b"RIFF" else "image/png"
+            return Response(row.png, media_type=mt, headers=headers)
     if pipeline is not None:  # local uploads keep their overlays on disk only
         p = pipeline.QUICKLOOK_DIR / key / name
         if p.exists():
