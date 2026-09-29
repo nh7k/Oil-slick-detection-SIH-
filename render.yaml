@@ -9,5 +9,7 @@ services:
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
-      - key: DATABASE_URL        # paste the Neon connection string in the Render dashboard
-        sync: false
+      # Detections are published by the live-update workflow as a SQLite file on the
+      # "data" release; the server downloads it every 20 minutes (no external database).
+      - key: DATA_RELEASE_URL
+        value: https://github.com/nh7k/Oil-slick-detection-SIH-/releases/download/data/oilspill.db

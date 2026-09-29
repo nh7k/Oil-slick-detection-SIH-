@@ -89,11 +89,13 @@ def _shrink(path: Path) -> bytes:
     from PIL import Image
 
     img = Image.open(path)
-    if max(img.size) > 1600:
-        f = 1600 / max(img.size)
+    if max(img.size) > 1024:
+        f = 1024 / max(img.size)
         img = img.resize((max(1, round(img.width * f)), max(1, round(img.height * f))), Image.BILINEAR)
+    if img.mode not in ("RGB", "RGBA"):
+        img = img.convert("RGBA")
     buf = io.BytesIO()
-    img.save(buf, format="PNG", optimize=True)
+    img.save(buf, format="WEBP", quality=70, method=4)  # same format the pipeline stores
     return buf.getvalue()
 
 

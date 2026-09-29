@@ -57,8 +57,69 @@ log = logging.getLogger("oilwatch")
 # A database that is briefly unreachable (cold Neon compute, wrong URL) must not kill the
 # web server: it still serves the website and reports the problem in /api/health.
 DB_ERROR: str | None = None
+
+# ---------------------------------------------------------------------------
+# "Database as a file": when DATA_RELEASE_URL is set (cloud web server), the detections
+# live in a SQLite file that the scheduled GitHub Actions job publishes as a release
+# asset. This server downloads it at startup and refreshes it every 20 minutes.
+# No external database service (and no quota) needed.
+# ---------------------------------------------------------------------------
+DATA_RELEASE_URL = _os.getenv("DATA_RELEASE_URL", "").strip()
+_count_cache: dict = {"t": 0.0, "n": 0, "err": None}
+_LIVE_DB = config.DATA_DIR / "live" / "oilspill.db"
+_data_state: dict = {"etag": None, "updated": None, "error": None}
+
+
+def _refresh_data_file() -> bool:
+    """Download the published SQLite file if it changed. Returns True when replaced."""
+    import httpx
+
+    _LIVE_DB.parent.mkdir(parents=True, exist_ok=True)
+    headers = {"If-None-Match": _data_state["etag"]} if _data_state["etag"] and _LIVE_DB.exists() else {}
+    try:
+        with httpx.Client(follow_redirects=True, timeout=120) as c:
+            r = c.get(DATA_RELEASE_URL, headers=headers)
+        if r.status_code == 304:
+            return False
+        r.raise_for_status()
+        tmp = _LIVE_DB.with_suffix(".tmp")
+        tmp.write_bytes(r.content)
+        _os.replace(tmp, _LIVE_DB)
+        _data_state.update(etag=r.headers.get("etag"), updated=datetime.now(UTC).isoformat(), error=None)
+        log.info("data file refreshed (%.1f MB)", len(r.content) / 1e6)
+        return True
+    except Exception as exc:  # noqa: BLE001
+        _data_state["error"] = f"{type(exc).__name__}: {exc}"
+        log.warning("data file refresh failed: %s", _data_state["error"])
+        return False
+
+
+if DATA_RELEASE_URL:
+    _refresh_data_file()
+
+    def _refresher():
+        import time as _t
+
+        while True:
+            _t.sleep(20 * 60)
+            if _refresh_data_file():
+                _count_cache["t"] = 0.0  # recount after new data
+
+    threading.Thread(target=_refresher, daemon=True).start()
+
 try:
-    engine = make_engine()
+    if DATA_RELEASE_URL:
+        from sqlalchemy.pool import NullPool
+
+        from .database import Base as _Base
+        from sqlalchemy import create_engine as _ce0
+        # NullPool: every request opens the file afresh, so a replaced file is picked up.
+        engine = _ce0(f"sqlite:///{_LIVE_DB.as_posix()}", poolclass=NullPool,
+                      connect_args={"check_same_thread": False})
+        if not _LIVE_DB.exists():
+            _Base.metadata.create_all(engine)  # empty until the first batch publishes data
+    else:
+        engine = make_engine()
 except Exception as _exc:  # noqa: BLE001
     DB_ERROR = f"{type(_exc).__name__}: {_exc}"
     log.error("database unavailable at startup: %s", DB_ERROR)
@@ -139,9 +200,6 @@ def _model_card() -> dict | None:
         return None
 
 
-_count_cache: dict = {"t": 0.0, "n": 0, "err": None}
-
-
 def _detection_count() -> tuple[int, str | None]:
     """Detection count, cached for an hour.
 
@@ -166,7 +224,9 @@ def health():
     lm = pipeline.get_model() if pipeline else None
     card = lm.card.raw if lm else (_model_card() if not PROCESSING_ENABLED else None)
     n, db_error = _detection_count()
-    return {"status": "ok" if db_error is None else "degraded", "db_error": db_error, "model_loaded": card is not None, "pipeline_error": PIPELINE_ERROR,
+    return {"status": "ok" if db_error is None else "degraded", "db_error": db_error,
+            "data_file": ({"updated": _data_state["updated"], "error": _data_state["error"]}
+                          if DATA_RELEASE_URL else None), "model_loaded": card is not None, "pipeline_error": PIPELINE_ERROR,
             "processing": "on-demand" if lm else ("scheduled" if not PROCESSING_ENABLED else "unavailable"),
             "model_version": card.get("model_version") if card else None, "db_detections": n}
 
