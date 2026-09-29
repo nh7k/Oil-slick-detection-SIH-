@@ -25,7 +25,7 @@ jobs:
     timeout-minutes: 330
     env:
       GH_TOKEN: ${{ github.token }}
-      OILSPILL_DATA_DIR: ${{ runner.temp }}/oilspill
+      OILSPILL_DATA_DIR: /tmp/oilspill
       OILSPILL_MODELS_DIR: models
       DATABASE_URL: sqlite:///${{ github.workspace }}/data/oilspill.db
     steps:
