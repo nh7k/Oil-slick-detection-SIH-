@@ -66,7 +66,8 @@ except Exception as _exc:  # noqa: BLE001
         from sqlalchemy import create_engine as _ce
 
         from .database import normalize_url as _nu
-        engine = _ce(_nu(config.DATABASE_URL), pool_pre_ping=True)
+        from .database import _ipv4_connect_args as _v4
+        engine = _ce(_nu(config.DATABASE_URL), pool_pre_ping=True, connect_args=_v4(_nu(config.DATABASE_URL)))
     except Exception:  # noqa: BLE001  (driver itself unavailable)
         engine = make_engine("sqlite://")
 SessionLocal = sessionmaker(engine, expire_on_commit=False)

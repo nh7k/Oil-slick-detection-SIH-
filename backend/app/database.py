@@ -111,9 +111,33 @@ def load_overlay(session: Session, key: str, kind: str) -> OverlayImage | None:
     return session.get(OverlayImage, (key, kind))
 
 
+def _ipv4_connect_args(url: str) -> dict:
+    """Pin Postgres connections to IPv4.
+
+    Hosts without IPv6 egress (Render's free tier) fail with "Network is unreachable" when
+    libpq picks the database's IPv6 address. Passing `hostaddr` keeps `host` for TLS/SNI
+    (which Neon needs for routing) while connecting to an IPv4 address.
+    """
+    import socket
+    from urllib.parse import urlsplit
+
+    try:
+        parts = urlsplit(url)
+        host, port = parts.hostname, parts.port or 5432
+        if not host:
+            return {}
+        infos = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
+        return {"hostaddr": infos[0][4][0]} if infos else {}
+    except OSError:
+        return {}
+
+
 def make_engine(url: str | None = None):
     url = normalize_url(url or config.DATABASE_URL)
-    kw = {"connect_args": {"check_same_thread": False}} if url.startswith("sqlite") else {"pool_pre_ping": True}
+    if url.startswith("sqlite"):
+        kw = {"connect_args": {"check_same_thread": False}}
+    else:
+        kw = {"pool_pre_ping": True, "connect_args": _ipv4_connect_args(url)}
     eng = create_engine(url, **kw)
     if url.startswith("sqlite"):
         @event.listens_for(eng, "connect")
