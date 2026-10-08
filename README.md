@@ -1,3 +1,7 @@
+LIVE URL = https://ocean-police.onrender.com/?lat=20.4857&lon=73.5808&zoom=5.25&min_confidence=0.9&classes=1_2_3&date_range=2025-09-28_2026-09-28&quicklooks=1
+
+
+
 # Ocean Police — Global Oil Slick Detection & Attribution
 
 A 4-class U-Net on Sentinel-1 SAR imagery for detecting and attributing oil slicks
